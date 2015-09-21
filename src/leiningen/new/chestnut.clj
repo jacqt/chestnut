@@ -132,8 +132,13 @@
 (defn files-to-render [opts]
   (cond-> ["project.clj"
            "resources/index.html"
+           "resources/public/bower.json"
            "src/clj/chestnut/server.clj"
            "src/cljs/chestnut/core.cljs"
+           "src/cljs/chestnut/components/dashboard.cljs"
+           "src/cljs/chestnut/components/login_signup.cljs"
+           "src/cljs/chestnut/utils/auth.cljs"
+           "src/cljs/chestnut/utils/http.cljs"
            "env/dev/clj/chestnut/dev.clj"
            "env/dev/cljs/chestnut/main.cljs"
            "env/prod/clj/chestnut/dev.clj"

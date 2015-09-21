@@ -17,6 +17,8 @@
                  [compojure "1.4.0"]
                  [enlive "1.1.6"]
                  [org.omcljs/om "0.9.0"]
+                 [secretary "1.2.3"]
+                 [cljsjs/jquery "1.9.1-0"] 
                  [environ "1.0.0"]{{{project-clj-deps}}}]
 
   :plugins [[lein-cljsbuild "1.0.5"]
