@@ -5,64 +5,43 @@
             [om.dom :as dom :include-macros true]
             [cljsjs.jquery]
             [secretary.core :as secretary :include-macros true :refer-macros [defroute]]
-            [goog.events :as events]
-            [goog.history.EventType :as EventType]
             [cljs.core.async :refer [put! chan <!]]
-            [{{project-ns}}.components.dashboard :as dashboard]
-            [{{project-ns}}.components.login-signup :as login-signup]
-            [{{project-ns}}.utils.auth :as auth])
-  (:import goog.History))
+            [{{project-ns}}.router :as router] 
+            [{{project-ns}}.index :as index] 
+            [{{project-ns}}.utils.auth :as auth]))
 
 (enable-console-print!)
 
-; enable fallback that don't have HTML 5 History
-(secretary/set-config! :prefix "#")
+; the auth-changed-channel which allows components to notify the model when
+; authentication status of the app has changed
+(defonce auth-changed-channel (chan))
 
-(def auth-status-channel (chan))
+; the app-state
+(defonce app-state (atom {:auth-changed-channel auth-changed-channel
+                          :credentials (auth/get-credentials)
+                          :route nil }))
 
-(def app-state (atom {:text "Hello Chestnut!",
-                      :auth-status-channel auth-status-channel}))
-(defn load-login-info []
+; function that syncs the app-state's credentials with the browser cookie state
+(defn update-login-info []
   (let [credentials (auth/get-credentials)]
-    (if
-      (not (= credentials nil))
-      (-> js/window
-        .-location
-        (set! "#/dashboard"))
-      (js/alert "YOU ARE NOT LOGGED IN"))))
+    (if (or (= credentials nil))
+      (swap! app-state assoc :credentials nil)
+      (swap! app-state assoc :credentials credentials))))
 
-;; on app-state channels for state updates
+; function loop to listen on th auth-changed-channel
 (defn listen-for-changes []
   (go
     (loop []
-      (.log js/console (<! auth-status-channel))
-      (load-login-info)
+      (<! auth-changed-channel )
+      (update-login-info)
       (recur))))
 
-(defroute
-  "/" []
-  (om/root
-    login-signup/login-signup-view
-    app-state
-    {:target (. js/document (getElementById "app"))}))
-
-(defroute
-  "/dashboard" []
-  (om/root
-    dashboard/dashboard-view
-    app-state
-    {:target (. js/document (getElementById "app"))}))
-
-;; Quick and dirty history configuration.
-(let [h (History.)]
-  (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-  (doto h (.setEnabled true)))
-
 (defn main []
-  (load-login-info)
-  (listen-for-changes))
-
-(defn on-js-reload []
-  (js/console.log "loading js again")
+  (listen-for-changes)
+  (router/route-app app-state)
   (secretary/dispatch!
-    (.substring (.. js/window -location -hash) 1)))
+    (.substring (.. js/window -location -hash) 1)) 
+  (om/root
+    index/index-view
+    app-state
+    {:target (. js/document (getElementById "app"))}))

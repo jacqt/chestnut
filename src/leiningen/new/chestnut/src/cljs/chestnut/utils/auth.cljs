@@ -12,5 +12,9 @@
 
 (defn get-credentials []
   (println "Retrieving credentials from cookies")
-  {:facebook-id (.get goog.net.cookies "facebook-id")
-   :auth-token (.get goog.net.cookies "auth-token")})
+  (let [facebook-id (goog.net.cookies.get "facebook-id")
+        auth-token  (goog.net.cookies.get "auth-token")]
+    (if (or (= facebook-id nil) (= auth-token nil))
+      nil
+      {:facebook-id facebook-id
+       :auth-token auth-token})))
