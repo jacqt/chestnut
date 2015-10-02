@@ -2,7 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <!]]
-            [{{project-ns}}.utils.auth :as auth]  
+            [{{project-ns}}.utils.auth :as auth]
             [{{project-ns}}.utils.http :as http]))
 
 

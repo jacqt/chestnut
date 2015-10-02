@@ -4,7 +4,7 @@
             [cljs.core.async :refer [put! chan <!]]
             [{{project-ns}}.components.login-signup :as login-signup]))
 
-(defn page-content-view [{:keys [auth-changed-channel]} this]
+(defn page-content-view [{:keys [credentials]} this]
   (reify om/IRenderState
     (render-state [this _]
       (dom/div
@@ -37,20 +37,19 @@
             #js {:className "ui text container"}
             (dom/h1
               #js {:className "ui inverted header"}
-              "Your Title!")
+              "Melamine!")
             (dom/h2
               #js {}
               "Your wonderful amazing message goes here!")
             (om/build
-              login-signup/login-signup-view
-              {:auth-changed-channel auth-changed-channel}))
+              login-signup/login-signup-view credentials))
           )
         )
       )
     )
   )
 
-(defn landing-page-view [{:keys [auth-changed-channel]} owner]
+(defn landing-page-view [state owner]
   (reify
     om/IRenderState
     (render-state [this _]
@@ -58,7 +57,4 @@
         #js {}
         (om/build
           page-content-view
-          {:auth-changed-channel auth-changed-channel}))
-      )
-    )
-  )
+          state)))))

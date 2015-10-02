@@ -7,10 +7,17 @@
             [{{project-ns}}.components.dashboard :as dashboard]
             [{{project-ns}}.components.event :as event]
             [{{project-ns}}.components.landing-page :as landing-page]
+            [{{project-ns}}.utils.http :as http]
             [{{project-ns}}.utils.auth :as auth]))
 
 (defn index-logged-in-view [state owner]
   (reify
+    om/IWillMount
+    (will-mount [this]
+      (http/get-user
+        (fn [response]
+          (let [user (:data response)]
+            (js/console.log user)))))
     om/IRenderState
     (render-state [this _]
       (case (@state :route)
@@ -22,6 +29,6 @@
   (reify
     om/IRenderState
     (render-state [this _]
-      (if (= (@state :credentials) nil)
+      (if (empty? (@state :credentials))
         (om/build landing-page/landing-page-view state)
         (om/build index-logged-in-view state)))))

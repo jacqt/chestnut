@@ -6,44 +6,57 @@
 (enable-console-print!)
 
 (def BASE_URL "http://api.notifsta.com/v1")
-(def LOGIN_URL (str BASE_URL "/auth/login"))
+(def LOGIN_URL (str BASE_URL "/auth/facebook"))
+(def USER_URL (str BASE_URL "/user/"))
+(def EVENT_URL (str BASE_URL "/event"))
 
 ; parses goog.net.XhrIo response to a json
 (defn parse-xhrio-response [success-callback fail-callback]
   (fn [response]
     (let [target (aget response "target")]
-      (if (.isSuccess target) 
+      (if (.isSuccess target)
         (let [json (.getResponseJson target)]
           (success-callback (js->clj json :keywordize-keys true)))
         (let [error (.getLastError target)]
           (fail-callback (js->clj error :keywordize-keys true)))))))
 
 ; wraps goog.net.XhrIo library in a simpler function xhr
-(defn xhr [http-method base-url url-params success-callback fail-callback]
+(defn xhr [{:keys [method base-url url-params on-complete on-error]}]
   (.send
     goog.net.XhrIo
-    (reduce 
+    (reduce
       (fn [partial-url param-key]
         (.appendParams
           goog.uri.utils
           partial-url
-          param-key
+          (name param-key)
           (url-params param-key)))
       base-url
       (keys url-params))
-    (parse-xhrio-response success-callback fail-callback)
-    http-method))
+    (parse-xhrio-response on-complete on-error)
+    method))
 
-(defn login [facebook-id facebook-token callback]
-  (xhr
-    "GET"
-    LOGIN_URL
-    {"facebook_id" facebook-id, "facebook_token" facebook-token}
-    (fn [response]
-      (let [data (response :data)]
-        (auth/set-credentials
-          {:facebook-id facebook-id,
-           :auth-token facebook-token})
-        (callback true)))
-    (fn [error]
-      (println "[LOG] Failed to login or signup"))))
+(defn login [facebook-id facebook-token email on-complete]
+  (xhr {:method "GET"
+        :base-url LOGIN_URL
+        :url-params {:email email
+                     :facebook_id facebook-id
+                     :facebook_token facebook-token}
+        :on-complete on-complete
+        :on-error (fn [error] (println "[LOG] Failed to login or signup")) }))
+
+(defn get-user [on-complete]
+  (xhr {:method "GET"
+        :base-url USER_URL
+        :url-params (auth/get-credentials)
+        :on-complete on-complete
+        :on-error (fn [error] (println "[LOG] Failed to get user info"))}))
+
+(defn get-event [event-id on-complete]
+  (xhr {:method "GET"
+        :base-url EVENT_URL
+        :url-params (merge
+                      {:event-id event-id}
+                      (auth/get-credentials))
+        :on-complete on-complete
+        :on-error (fn [error] (println "[LOG] Failed to get event info"))}))
