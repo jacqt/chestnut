@@ -9,6 +9,7 @@
   :jsload-callback (fn []
                      (core/main)))
 
-(weasel/connect "ws://localhost:9001" :verbose true :print #{:repl :console})
+(if-not (weasel/alive?)
+  (weasel/connect "ws://localhost:9001" :verbose true :print #{:repl :console}))
 
 (core/main)
