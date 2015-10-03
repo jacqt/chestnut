@@ -6,11 +6,11 @@
             [{{project-ns}}.utils.http :as http]))
 
 
-(defn logout [auth-changed-channel]
+(defn logout [credentials]
   (auth/clear-credentials)
-  (put! auth-changed-channel "logged-out"))
+  (om/update! credentials (auth/get-credentials)))
 
-(defn dashboard-view [{:keys [auth-changed-channel]} owner]
+(defn dashboard-view [{:keys [credentials]} owner]
   (reify
     om/IRenderState
     (render-state [this _]
@@ -28,7 +28,7 @@
             "Click here to do random stuff")
           (dom/button
             #js {:className "ui button"
-                 :onClick (fn [e] (logout auth-changed-channel))}
+                 :onClick (fn [e] (logout credentials))}
             "Click here to logout")
           (dom/input
             #js {:className "dashboard-input"

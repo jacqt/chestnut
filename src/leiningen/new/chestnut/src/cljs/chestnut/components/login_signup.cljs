@@ -20,7 +20,7 @@
               (let [new-credentials (:data response)]
                 (auth/set-credentials {:facebook-id (:facebook_id new-credentials)
                                        :auth-token (:authentication_token new-credentials)})
-                (om/update! credentials new-credentials)))))))
+                (om/update! credentials (auth/get-credentials))))))))
     #js{"scope" "email"}))
 
 (defn login-signup-view [credentials owner]
