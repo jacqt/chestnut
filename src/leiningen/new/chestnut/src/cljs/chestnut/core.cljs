@@ -7,18 +7,15 @@
             [cljs.core.async :refer [put! chan <!]]
             [{{project-ns}}.router :as router]
             [{{project-ns}}.index :as index]
-            [{{project-ns}}.utils.auth :as auth]))
+            [{{project-ns}}.models :as models]))
 
 (enable-console-print!)
 
-(defonce app-state (atom {:credentials (auth/get-credentials)
-                          :route nil }))
-
 (defn main []
-  (router/route-app app-state)
+  (router/route-app models/app-state)
   (secretary/dispatch!
     (.substring (.. js/window -location -hash) 1))
   (om/root
     index/index-view
-    app-state
+    models/app-state
     {:target (js/document.getElementById "app")}))
