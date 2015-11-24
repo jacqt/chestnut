@@ -1,6 +1,6 @@
 (ns {{project-ns}}.components.event
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros [html]]
             [cljs.core.async :refer [put! chan <!]]
             [{{project-ns}}.utils.http :as http]))
 
@@ -8,11 +8,6 @@
   (reify
     om/IRenderState
     (render-state [this _]
-      (dom/div
-        #js {:className "dashboard-panel"}
-        (dom/h1
-          #js {}
-          "Event page here!")
-        (dom/h2
-          #js {}
-          (str "Event Id: " (event :id)))))))
+      (html [:div {:class "dashboard-panel"}
+             [:h1 "A sub page here"]
+             [:h2 (str "page id: " (event :id))]]))))

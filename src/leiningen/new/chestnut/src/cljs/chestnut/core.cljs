@@ -9,8 +9,6 @@
             [{{project-ns}}.index :as index]
             [{{project-ns}}.models :as models]))
 
-(enable-console-print!)
-
 (defn main []
   (router/route-app models/app-state)
   (secretary/dispatch!

@@ -3,5 +3,6 @@
             [om.dom :as dom :include-macros true]
             [{{project-ns}}.utils.auth :as auth]))
 
+(enable-console-print!)
 (defonce app-state (atom {:credentials (auth/get-credentials)
                           :route nil }))

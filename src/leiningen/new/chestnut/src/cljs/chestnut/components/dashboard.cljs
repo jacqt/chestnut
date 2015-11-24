@@ -1,10 +1,9 @@
 (ns {{project-ns}}.components.dashboard
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros [html]]
             [cljs.core.async :refer [put! chan <!]]
             [{{project-ns}}.utils.auth :as auth]
             [{{project-ns}}.utils.http :as http]))
-
 
 (defn logout [credentials]
   (auth/clear-credentials)
@@ -14,22 +13,10 @@
   (reify
     om/IRenderState
     (render-state [this _]
-      (dom/div
-        #js {:className "dashboard-panel"}
-        (dom/div
-          #js {:className "dashboard-welcome"}
-          (dom/h1
-            #js {}
-            "Welcome to FriendBnb!"))
-        (dom/div
-          #js {:className "dashboard-content"}
-          (dom/button
-            #js {:className "ui button"}
-            "Click here to do random stuff")
-          (dom/button
-            #js {:className "ui button"
-                 :onClick (fn [e] (logout credentials))}
-            "Click here to logout")
-          (dom/input
-            #js {:className "dashboard-input"
-                 :placeholder "Enter your friend's name!"}))))))
+      (html [:div {:class "dashboard-panel"}
+             [:div {:class "dashboard-welcome"}
+              [:h1 "Welcome to your dashboard"]]
+             [:div {:class "dashboard-content"}
+              [:button {:class "ui button"} "A button"]
+              [:button {:class "ui button"
+                        :on-click #(logout credentials)} "Click here to logout"]]]))))
